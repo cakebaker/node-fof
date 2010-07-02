@@ -1,6 +1,7 @@
 var sys = require('sys'),
     http = require('http'),
-    arrayDiff = require('./array').array_diff;
+    arrayDiff = require('./array').array_diff,
+    caseInsensitiveSort = require('./sort').caseInsensitiveSort;
 
 if (process.argv.length < 3) {
     sys.puts('No twitter user name specified.');
@@ -54,15 +55,9 @@ function getUsernames(type, callback) {
 function getPeopleNotFollowingBack() {
     var friends;
     var followers;
-    var sortByUsername = function(a, b) {
-        var x = a.toLowerCase();
-        var y = b.toLowerCase();
-
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-    };
 
     return function(type, usernames) {
-        var sortedUsernames = usernames.sort(sortByUsername);
+        var sortedUsernames = usernames.sort(caseInsensitiveSort);
 
         if (type == 'friends') {
             friends = sortedUsernames;
