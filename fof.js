@@ -9,48 +9,77 @@ if (process.argv.length < 3) {
 
 var username = process.argv[2];
 var twitter = http.createClient(80, 'api.twitter.com');
-var friends = [];
-var followers = [];
 
-var getTweets = function(nextCursor, twitterApiMethod) {
-    var callee = arguments.callee;
-    var request = twitter.request('GET', '/1/statuses/'+twitterApiMethod+'.json?screen_name='+username+'&cursor='+nextCursor, {'host': 'api.twitter.com'});
+function getUsernames(type, callback) {
+    var usernames = [];
+    var cursor = -1;
 
-    request.addListener('response', function(response) {
-	var data = '';
+    return function() {
+        var callee = arguments.callee;
+        var request = twitter.request('GET', '/1/statuses/'+type+'.json?screen_name='+username+'&cursor='+cursor, {'host': 'api.twitter.com'});
 
-	response.addListener('data', function(chunk) {
-	    data += chunk;
-	});
+        request.addListener('response', function(response) {
+            var data = '';
 
-	response.addListener('end', function() {
-	    tweets = JSON.parse(data);
-	    var users = tweets['users'], length = users.length;
+            response.addListener('data', function(chunk) {
+                data += chunk;
+            });
 
-	    for (var i = 0; i < length; i++) {
-		friends.push(users[i].screen_name);
-		sys.puts(users[i].screen_name);
-	    }
+            response.addListener('end', function() {
+                if (response.statusCode == 200) {
+                    tweets = JSON.parse(data);
+                    var users = tweets['users'], length = users.length;
 
-	    sys.puts(tweets.next_cursor);
+                    for (var i = 0; i < length; i++) {
+                        usernames.push(users[i].screen_name);
+                    }
 
-	    if (tweets.next_cursor > 0) {
-		callee(tweets.next_cursor, twitterApiMethod);
-	    }
-	});
-    });
+                    if (tweets.next_cursor > 0) {
+                        cursor = tweets.next_cursor;
+                        callee();
+                    } else {
+                        callback(type, usernames);
+                    }
+                } else {
+                    sys.puts('An error occured: ' + response.statusCode);
+                    process.exit(1);
+                }
+            });
+        });
 
-    request.end();
-};
-
-getTweets(-1, 'friends');
-getTweets(-1, 'followers');
-
-/*
-sys.puts('--------------------------');
-var diff = arrayDiff(friends, followers);
-
-for (var prop in diff) {
-    sys.puts("\n "+diff[prop]);
+        request.end();
+    }
 }
-*/
+
+function getPeopleNotFollowingBack() {
+    var friends;
+    var followers;
+    var sortByUsername = function(a, b) {
+        var x = a.toLowerCase();
+        var y = b.toLowerCase();
+
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    };
+
+    return function(type, usernames) {
+        var sortedUsernames = usernames.sort(sortByUsername);
+
+        if (type == 'friends') {
+            friends = sortedUsernames;
+        } else {
+            followers = sortedUsernames;
+        }
+
+        if (typeof(friends) == 'object' && typeof(followers) == 'object') {
+            var diff = arrayDiff(friends, followers);
+
+            for (var prop in diff) {
+                sys.puts(diff[prop]);
+            }
+        }
+    }
+}
+
+var callback = getPeopleNotFollowingBack();
+getUsernames('friends', callback)();
+getUsernames('followers', callback)();
