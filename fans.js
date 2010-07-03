@@ -8,9 +8,9 @@ if (process.argv.length < 3) {
 }
 
 var username = process.argv[2];
-var twitter = http.createClient(80, 'api.twitter.com');
 
 function getUsernames(type, callback) {
+    var twitter = http.createClient(80, 'api.twitter.com');
     var usernames = [];
     var cursor = -1;
 
