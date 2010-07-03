@@ -7,16 +7,14 @@ if (process.argv.length < 3) {
     process.exit(1);
 }
 
-var username = process.argv[2];
-
-function getUsernames(type, callback) {
+function getUsernames(screenName, type, callback) {
     var twitter = http.createClient(80, 'api.twitter.com');
     var usernames = [];
     var cursor = -1;
 
     return function() {
         var callee = arguments.callee;
-        var request = twitter.request('GET', '/1/statuses/'+type+'.json?screen_name='+username+'&cursor='+cursor, {'host': 'api.twitter.com'});
+        var request = twitter.request('GET', '/1/statuses/'+type+'.json?screen_name='+screenName+'&cursor='+cursor, {'host': 'api.twitter.com'});
 
         request.addListener('response', function(response) {
             var data = '';
@@ -51,6 +49,7 @@ function getUsernames(type, callback) {
     }
 }
 
+var screenName = process.argv[2];
 var callback = getFans();
-getUsernames('friends', callback)();
-getUsernames('followers', callback)();
+getUsernames(screenName, 'friends', callback)();
+getUsernames(screenName, 'followers', callback)();
