@@ -1,7 +1,6 @@
 var sys = require('sys'),
     http = require('http'),
-    arrayDiff = require('./array').array_diff,
-    caseInsensitiveSort = require('./sort').caseInsensitiveSort;
+    getFans = require('./strategies').fanStrategy;
 
 if (process.argv.length < 3) {
     sys.puts('No twitter user name specified.');
@@ -49,29 +48,6 @@ function getUsernames(type, callback) {
         });
 
         request.end();
-    }
-}
-
-function getFans() {
-    var friends;
-    var followers;
-
-    return function(type, usernames) {
-        var sortedUsernames = usernames.sort(caseInsensitiveSort);
-
-        if (type == 'friends') {
-            friends = sortedUsernames;
-        } else {
-            followers = sortedUsernames;
-        }
-
-        if (typeof(friends) == 'object' && typeof(followers) == 'object') {
-            var diff = arrayDiff(followers, friends);
-
-            for (var prop in diff) {
-                sys.puts(diff[prop]);
-            }
-        }
     }
 }
 
