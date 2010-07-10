@@ -1,13 +1,12 @@
 var sys = require('sys'),
-    getUsernames = require('./twitter').getUsernames,
-    getFans = require('./strategies').fanStrategy;
+    Twitter = require('./twitter').Twitter,
+    StrategyFactory = require('./strategies').StrategyFactory;
 
 if (process.argv.length < 3) {
     sys.puts('No twitter user name specified.');
     process.exit(1);
 }
 
-var screenName = process.argv[2];
-var callback = getFans();
-getUsernames(screenName, 'friends', callback)();
-getUsernames(screenName, 'followers', callback)();
+var twitter = new Twitter(process.argv[2]);
+var factory = new StrategyFactory();
+twitter.getUsernames(factory.getFanStrategy());

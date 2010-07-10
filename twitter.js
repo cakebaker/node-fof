@@ -1,44 +1,90 @@
 var sys = require('sys'),
+    events = require('events'),
     http = require('http');
 
-exports.getUsernames = function (screenName, type, callback) {
-    var twitter = http.createClient(80, 'api.twitter.com');
-    var usernames = [];
-    var cursor = -1;
+function Twitter(screenName) {
+    var twitterClient = http.createClient(80, 'api.twitter.com');
 
-    return function() {
-        var callee = arguments.callee;
-        var request = twitter.request('GET', '/1/statuses/'+type+'.json?screen_name='+screenName+'&cursor='+cursor, {'host': 'api.twitter.com'});
+    this.makeRequest = function(type, callback) {
+        var usernames = [];
+        var cursor = -1;
 
-        request.addListener('response', function(response) {
-            var data = '';
+        return function() {
+            var callee = arguments.callee;
+            var request = twitterClient.request('GET', '/1/statuses/'+type+'.json?screen_name='+screenName+'&cursor='+cursor, {'host': 'api.twitter.com'});
 
-            response.addListener('data', function(chunk) {
-                data += chunk;
-            });
+            request.addListener('response', function(response) {
+                var data = '';
 
-            response.addListener('end', function() {
-                if (response.statusCode == 200) {
-                    tweets = JSON.parse(data);
-                    var users = tweets['users'], length = users.length;
+                response.addListener('data', function(chunk) {
+                    data += chunk;
+                });
 
-                    for (var i = 0; i < length; i++) {
-                        usernames.push(users[i].screen_name);
-                    }
+                response.addListener('end', function() {
+                    if (response.statusCode == 200) {
+                        tweets = JSON.parse(data);
+                        var users = tweets['users'], length = users.length;
 
-                    if (tweets.next_cursor > 0) {
-                        cursor = tweets.next_cursor;
-                        callee();
+                        for (var i = 0; i < length; i++) {
+                            usernames.push(users[i].screen_name);
+                        }
+
+                        if (tweets.next_cursor > 0) {
+                            cursor = tweets.next_cursor;
+                            callee();
+                        } else {
+                            callback(usernames);
+                        }
                     } else {
-                        callback(type, usernames);
+                        sys.puts('An error occured: ' + response.statusCode);
+                        process.exit(1);
                     }
-                } else {
-                    sys.puts('An error occured: ' + response.statusCode);
-                    process.exit(1);
-                }
+                });
             });
-        });
 
-        request.end();
+            request.end();
+        }
     }
+};
+
+exports.Twitter = Twitter;
+
+Twitter.prototype.getUsernames = function(strategy) {
+    this.resultContainer = new ResultBucket();
+    this.resultContainer.addListener('full', function(friends, followers) {
+        strategy.execute(friends, followers);
+    });
+    this.getFollowers();
+    this.getFriends();
 }
+
+Twitter.prototype.getFollowers = function() {
+    this.makeRequest('followers', this.resultContainer.setFollowers)();
+}
+
+Twitter.prototype.getFriends = function() {
+    this.makeRequest('friends', this.resultContainer.setFriends)();
+}
+
+function ResultBucket() {
+    var that = this;
+    var friends, followers;
+
+    this.setFollowers = function(followers) {
+        this.followers = followers;
+
+        if (typeof(this.friends) == 'object') {
+            that.emit('full', this.friends, this.followers);
+        }
+    };
+
+    this.setFriends = function(friends) {
+        this.friends = friends;
+
+        if (typeof(this.followers) == 'object') {
+            that.emit('full', this.friends, this.followers);
+        }
+    };
+}
+
+sys.inherits(ResultBucket, events.EventEmitter);

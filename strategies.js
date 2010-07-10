@@ -3,71 +3,46 @@ var sys = require('sys'),
     arrayDiff = require('./array').array_diff,
     arrayIntersection = require('./array').array_intersect;
 
-exports.fanStrategy = function() {
-    var friends;
-    var followers;
+function StrategyFactory() {
+    this.getFanStrategy = function() {
+        return new OutputStrategy(new FanStrategy());
+    }
 
-    return function(type, usernames) {
-        var sortedUsernames = usernames.sort(caseInsensitiveSort);
+    this.getFriendStrategy = function() {
+        return new OutputStrategy(new FriendStrategy());
+    }
 
-        if (type == 'friends') {
-            friends = sortedUsernames;
-        } else {
-            followers = sortedUsernames;
-        }
+    this.getNotFollowingBackStrategy = function() {
+        return new OutputStrategy(new NotFollowingBackStrategy());
+    }
+}
 
-        if (typeof(friends) == 'object' && typeof(followers) == 'object') {
-            var diff = arrayDiff(followers, friends);
+exports.StrategyFactory = StrategyFactory;
 
-            for (var prop in diff) {
-                sys.puts(diff[prop]);
-            }
+function OutputStrategy(strategy) {
+    this.execute = function(friends, followers) {
+        var result = strategy.execute(friends.sort(caseInsensitiveSort), followers.sort(caseInsensitiveSort));
+
+        for (var prop in result) {
+            sys.puts(result[prop]);
         }
     }
 }
 
-exports.friendStrategy = function() {
-    var friends;
-    var followers;
-
-    return function(type, usernames) {
-        var sortedUsernames = usernames.sort(caseInsensitiveSort);
-
-        if (type == 'friends') {
-            friends = sortedUsernames;
-        } else {
-            followers = sortedUsernames;
-        }
-
-        if (typeof(friends) == 'object' && typeof(followers) == 'object') {
-            var intersection = arrayIntersection(friends, followers);
-
-            for (var prop in intersection) {
-                sys.puts(intersection[prop]);
-            }
-        }
+function FanStrategy() {
+    this.execute = function(friends, followers) {
+        return arrayDiff(followers, friends);
     }
 }
 
-exports.notFollowingBackStrategy = function() {
-    var friends;
-    var followers;
+function FriendStrategy() {
+    this.execute = function(friends, followers) {
+        return arrayIntersection(friends, followers);
+    }
+}
 
-    return function(type, usernames) {
-        var sortedUsernames = usernames.sort(caseInsensitiveSort);
-
-        if (type == 'friends') {
-            friends = sortedUsernames;
-        } else {
-            followers = sortedUsernames;
-        }
-
-        if (typeof(friends) == 'object' && typeof(followers) == 'object') {
-            var diff = arrayDiff(friends, followers);
-
-            for (var prop in diff) {
-                sys.puts(diff[prop]);
-            }
-        }
+function NotFollowingBackStrategy() {
+    this.execute = function(friends, followers) {
+        return arrayDiff(friends, followers);
     }
 }
