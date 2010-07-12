@@ -4,17 +4,18 @@ var sys = require('sys'),
     arrayIntersection = require('./lib/array').array_intersect;
 
 function StrategyFactory() {
-    this.getFanStrategy = function() {
-        return new OutputStrategy(new FanStrategy());
-    }
+}
 
-    this.getFriendStrategy = function() {
-        return new OutputStrategy(new FriendStrategy());
-    }
+StrategyFactory.getFanStrategy = function() {
+    return new OutputStrategy(new FanStrategy());
+}
 
-    this.getNotFollowingBackStrategy = function() {
-        return new OutputStrategy(new NotFollowingBackStrategy());
-    }
+StrategyFactory.getFriendStrategy = function() {
+    return new OutputStrategy(new FriendStrategy());
+}
+
+StrategyFactory.getNotFollowingBackStrategy = function() {
+    return new OutputStrategy(new NotFollowingBackStrategy());
 }
 
 exports.StrategyFactory = StrategyFactory;

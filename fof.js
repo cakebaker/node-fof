@@ -2,19 +2,18 @@ var sys = require('sys'),
     Options = require('./option_parser').Options,
     OptionParser = require('./option_parser').OptionParser,
     Twitter = require('./twitter').Twitter,
-    StrategyFactory = require('./strategies').StrategyFactory;
+    Factory = require('./strategies').StrategyFactory;
 
 var selectedOption = OptionParser.parse();
 
 if (selectedOption != OptionParser.HELP && selectedOption != OptionParser.INVALID_OPTION) {
     var twitter = new Twitter(process.argv[2]);
-    var factory = new StrategyFactory();
 }
 
 switch (selectedOption) {
-    case Options.FOLLOWING:        return twitter.getUsernames(factory.getNotFollowingBackStrategy());
-    case Options.FANS:             return twitter.getUsernames(factory.getFanStrategy());
-    case Options.FRIENDS:          return twitter.getUsernames(factory.getFriendStrategy());
+    case Options.FOLLOWING:        return twitter.getUsernames(Factory.getNotFollowingBackStrategy());
+    case Options.FANS:             return twitter.getUsernames(Factory.getFanStrategy());
+    case Options.FRIENDS:          return twitter.getUsernames(Factory.getFriendStrategy());
     case Options.HELP:             return showUsage();
     case Options.INVALID_OPTION:   sys.puts('Invalid option');
                                    sys.puts('');
