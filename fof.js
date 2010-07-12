@@ -1,8 +1,8 @@
 var sys = require('sys'),
-    Options = require('./option_parser').Options,
-    OptionParser = require('./option_parser').OptionParser,
-    Twitter = require('./twitter').Twitter,
-    Factory = require('./strategies').StrategyFactory;
+    Options = require('./lib/option_parser').Options,
+    OptionParser = require('./lib/option_parser').OptionParser,
+    Twitter = require('./lib/twitter').Twitter,
+    Factory = require('./lib/strategies').StrategyFactory;
 
 var selectedOption = OptionParser.parse();
 
