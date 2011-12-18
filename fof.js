@@ -1,4 +1,4 @@
-var sys = require('sys'),
+var util = require('util'),
     Options = require('./lib/option_parser').Options,
     OptionParser = require('./lib/option_parser').OptionParser,
     Twitter = require('./lib/twitter').Twitter,
@@ -15,20 +15,20 @@ switch (selectedOption) {
     case Options.FANS:             return twitter.getUsernames(Factory.getFanStrategy());
     case Options.FRIENDS:          return twitter.getUsernames(Factory.getFriendStrategy());
     case Options.HELP:             return showUsage();
-    case Options.INVALID_OPTION:   sys.puts('Invalid option');
-                                   sys.puts('');
+    case Options.INVALID_OPTION:   util.puts('Invalid option');
+                                   util.puts('');
                                    showUsage();
                                    process.exit(1);
 }
 
 function showUsage() {
-    sys.puts('Usage: node fof.js (<username>) ([OPTION])');
-    sys.puts('List <username>\'s Twitter fans, friends, or people he follows.');
-    sys.puts('');
-    sys.puts(' --fans         get people who follow <username>, but are not followed back');
-    sys.puts(' --following    get people who are followed by <username>, but don\'t follow back');
-    sys.puts(' --friends      get people who are followed by <username>, and follow back');
-    sys.puts(' --help         display this help and exit');
-    sys.puts('');
-    sys.puts('If no OPTION is specified, the --following option is used.');
+    util.puts('Usage: node fof.js (<username>) ([OPTION])');
+    util.puts('List <username>\'s Twitter fans, friends, or people he follows.');
+    util.puts('');
+    util.puts(' --fans         get people who follow <username>, but are not followed back');
+    util.puts(' --following    get people who are followed by <username>, but don\'t follow back');
+    util.puts(' --friends      get people who are followed by <username>, and follow back');
+    util.puts(' --help         display this help and exit');
+    util.puts('');
+    util.puts('If no OPTION is specified, the --following option is used.');
 }
