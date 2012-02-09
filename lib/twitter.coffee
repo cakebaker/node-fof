@@ -21,29 +21,20 @@ class Twitter
       )
 
   lookupUsers: (userIds, callback) ->
-    request = twitterClient.request('GET', "/1/users/lookup.json?user_id=#{userIds.join()}", {'host': 'api.twitter.com'})
-
-    request.addListener('response', (response) ->
-      data = ''
-
-      response.addListener('data', (chunk) ->
-        data += chunk
-      )
-
-      response.addListener('end', ->
-        if (response.statusCode is 200)
-          usernames = []
-          users = JSON.parse(data)
-          usernames.push(user.screen_name) for user in users
-          callback(usernames)
-      )
-    )
-
-    request.end()
+    @makeGetRequest "/1/users/lookup.json?user_id=#{userIds.join()}", (data) ->
+      usernames = []
+      users = JSON.parse(data)
+      usernames.push(user.screen_name) for user in users
+      callback(usernames)
 
   getIds: (type, callback) ->
     cursor = -1
-    request = twitterClient.request('GET', "/1/#{type}/ids.json?screen_name=#{@screenName}&cursor=#{cursor}", {'host': 'api.twitter.com'})
+    @makeGetRequest "/1/#{type}/ids.json?screen_name=#{@screenName}&cursor=#{cursor}", (data) ->
+      result = JSON.parse(data)
+      callback(type, result.ids)
+
+  makeGetRequest: (url, dataHandler) ->
+    request = twitterClient.request('GET', url, {'host': 'api.twitter.com'})
 
     request.addListener('response', (response) ->
       data = ''
@@ -54,8 +45,7 @@ class Twitter
 
       response.addListener('end', ->
         if (response.statusCode is 200)
-          result = JSON.parse(data)
-          callback(type, result.ids)
+          dataHandler(data)
         else
           console.log("An error occured: #{response.statusCode}")
           process.exit(1)
