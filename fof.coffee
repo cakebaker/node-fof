@@ -1,5 +1,6 @@
 showUsage = require('./lib/help').showUsage
 caseInsensitiveCompare = require('./lib/sort').caseInsensitiveCompare
+nicePeople = require('./lib/texthelper').nicePeople
 Options = require('./lib/argument_parser').Options
 ArgumentParser = require('./lib/argument_parser').ArgumentParser
 Twitter = require('./lib/twitter').Twitter
@@ -15,6 +16,7 @@ success = (screenName, option) ->
   twitter.getUsernames(strategy, (usernames) ->
     usernames.sort(caseInsensitiveCompare)
     console.log(username) for username in usernames
+    console.log("#{nicePeople(usernames.length)} found")
   )
 
 help = ->
