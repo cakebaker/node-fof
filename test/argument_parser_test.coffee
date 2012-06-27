@@ -1,4 +1,4 @@
-require('should')
+assert = require('assert')
 Options = require('../lib/argument_parser').Options
 ArgumentParser = require('../lib/argument_parser').ArgumentParser
 
@@ -17,8 +17,8 @@ describe "ArgumentParser", ->
 
       it "calls the success callback with the given username and the default option", ->
         ArgumentParser.parse(args, ((username, type) ->
-          username.should.equal(theUsername)
-          type.should.equal(Options.FOLLOWING)
+          assert.equal(username, theUsername)
+          assert.equal(type, Options.FOLLOWING)
         ), fail, fail)
 
       it "calls the success callback with the given username and the given option", ->
@@ -30,8 +30,8 @@ describe "ArgumentParser", ->
           localArgs.push(option)
 
           ArgumentParser.parse(localArgs, ((username, type) ->
-            username.should.equal(theUsername)
-            type.should.equal(expectedOptions[index])
+            assert.equal(username, theUsername)
+            assert.equal(type, expectedOptions[index])
           ), fail, fail)
 
       it "calls the unknown callback when an unknown argument is given", ->
