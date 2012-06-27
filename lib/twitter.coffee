@@ -2,10 +2,7 @@ http = require('http')
 util = require('util')
 
 class Twitter
-  twitterClient = null
-
   constructor: (@screenName) ->
-    twitterClient = http.createClient(80, 'api.twitter.com')
 
   getUsernames: (strategy, callback) ->
     items = ['friends', 'followers']
@@ -34,7 +31,11 @@ class Twitter
       callback(type, result.ids)
 
   makeGetRequest: (url, dataHandler) ->
-    request = twitterClient.request('GET', url, {'host': 'api.twitter.com'})
+    options = {
+      host: 'api.twitter.com',
+      path: url
+    }
+    request = http.request(options)
 
     request.addListener('response', (response) ->
       data = ''
